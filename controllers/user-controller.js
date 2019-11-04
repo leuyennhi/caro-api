@@ -26,7 +26,7 @@ exports.register = (req, res) => {
         newUser.save(function(err) {
                 if (err)
                     throw err;
-                return res.send(newUser);
+                return res.json(newUser);
         });
     });
 }
@@ -39,12 +39,12 @@ exports.login = (req, res, next) => {
         }
         req.login(passportUser, {session: false}, (err) => {
             if (err) {
-                res.send(err);
+                return res.send(err);
             }
-            console.log(passportUser.id);
+            //console.log(passportUser);
             // generate a signed son web token with the contents of user object and return it in the response
             const token = jwt.sign({id: passportUser.id}, jwtSecret.secret);
-            return res.json({token:token, auth: true});
+            return res.json({user: passportUser, token});
         }); 
         return res.status(400).send({
             message: "Đã có lỗi xảy ra. Đăng nhập thất bại."

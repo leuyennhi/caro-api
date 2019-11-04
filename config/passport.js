@@ -4,28 +4,29 @@ const JWTStrategy   = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 const User = require('../models/user-model.js');
 const jwtSecret = require('./jwt.js');
+const bcrypt = require('bcrypt');
 
 module.exports = function(passport) {
 
     passport.use('local-login', new LocalStrategy({
-            email: 'email',
-            password: 'password'
+            usernameField: 'email',
+            passwordField: 'password',
         }, 
         function (email, password, done) {
             
-            return User.findOne({'email': email}, async function(err, user) {
+            return User.findOne({email}, async function(err, user) {
                 if (err)
                     return done(err);
 
                 if (!user) {
-                    return done(null, false, {message: 'Tài khoản không tồn tại!'});
+                    return done(null, false, {message: "Tài khoản không tồn tại"});
                 }
 
                 if(!await bcrypt.compare(password, user.password)) {
-                    return done(null, false, {message: 'Mật khẩu không đúng!'});
+                    return done(null, false, {message: "Mật khẩu không đúng"});
                 }
 
-                return done(null, user, {message: 'Đăng nhập thành công'});
+                return done(null, user, {message: "Đăng nhập thành công"});
             });
         }
     ));
