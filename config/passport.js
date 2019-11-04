@@ -12,13 +12,21 @@ module.exports = function(passport) {
             password: 'password'
         }, 
         function (email, password, done) {
-            //this one is typically a DB call. Assume that the returned user object is pre-formatted and ready for storing in JWT
-            return User.findOne({email, password}).then(user => {
+            
+            return User.findOne({'email': email}, async function(err, user) {
+                if (err)
+                    return done(err);
+
                 if (!user) {
-                    return done(null, false, {message: 'Tài khoản hoặc mật khẩu sai.'});
+                    return done(null, false, {message: 'Tài khoản không tồn tại!'});
                 }
+
+                if(!await bcrypt.compare(password, user.password)) {
+                    return done(null, false, {message: 'Mật khẩu không đúng!'});
+                }
+
                 return done(null, user, {message: 'Đăng nhập thành công'});
-            }).catch(err => done(err));
+            });
         }
     ));
 

@@ -6,7 +6,8 @@ var UserSchema = new Schema({
     password:{type:String,require:true},
     displayname: {type: String, required: true},
     dob:{type: Date, required: true},
-    gender: {type:String, required:true}
+    gender: {type:String, required:true},
+    avata:{type:String}
 });
 
 // Export model.
