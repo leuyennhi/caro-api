@@ -8,7 +8,7 @@ exports.register = (req, res) => {
     
     User.findOne({ 'email' : req.body.email }, async function(err, user) {
         if (err) {
-            return res.status(500).send({ message: err.message});
+            return res.status(500).send({message: err.message});
         }
         
         if (user) {
@@ -18,9 +18,7 @@ exports.register = (req, res) => {
         var newUser = new User({
                 email: req.body.email,
                 password : await bcrypt.hash(req.body.password, 10),
-                displayname: req.body.displayname,
-                gender:req.body.gender,
-                dob:req.body.dob
+                displayname: req.body.displayname
         });
 
         newUser.save(function(err) {
@@ -58,8 +56,7 @@ exports.me = (req, res, next) => {
             return next(err);
         }
         if (passportUser) {
-            console.log(passportUser);
-            return res.json({passportUser});
+            return res.json({user: passportUser});
         }
         return res.status(400).send({
             message: "Đã có lỗi xảy ra."
