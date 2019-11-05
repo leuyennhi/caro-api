@@ -8,11 +8,11 @@ exports.register = (req, res) => {
     
     User.findOne({ 'email' : req.body.email }, async function(err, user) {
         if (err) {
-            return res.status(500).send({message: err.message});
+            return res.status(500).json({message: err.message});
         }
         
         if (user) {
-            return res.status(500).send({message: "Email đã tồn tại."});
+            return res.status(500).json({message: "Email đã tồn tại."});
         }   
         
         var newUser = new User({
@@ -24,7 +24,7 @@ exports.register = (req, res) => {
         newUser.save(function(err) {
                 if (err)
                     throw err;
-                return res.json(newUser);
+                return res.json({user: newUser});
         });
     });
 }
@@ -44,7 +44,7 @@ exports.login = (req, res, next) => {
             const token = jwt.sign({id: passportUser.id}, jwtSecret.secret);
             return res.json({user: passportUser, token});
         }); 
-        return res.status(400).send({
+        return res.status(400).json({
             message: "Đã có lỗi xảy ra. Đăng nhập thất bại."
         });
     })(req, res, next);
@@ -58,7 +58,7 @@ exports.me = (req, res, next) => {
         if (passportUser) {
             return res.json({user: passportUser});
         }
-        return res.status(400).send({
+        return res.status(400).json({
             message: "Đã có lỗi xảy ra."
         })
     })(req, res, next);

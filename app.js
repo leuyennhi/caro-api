@@ -5,8 +5,10 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var passport = require('passport');
+var cors = require('cors')
 
 var app = express();
+app.use(cors());
 
 require('./config/passport')(passport);
 
