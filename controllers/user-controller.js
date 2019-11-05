@@ -31,7 +31,7 @@ exports.register = (req, res) => {
 
 exports.login = (req, res, next) => {
 
-    passport.authenticate('local-login', { session: false }, (err, passportUser) => {
+    passport.authenticate('local-login', { session: false }, (err, passportUser, message) => {
         if (err) {
             return next(err);
         }
@@ -45,7 +45,7 @@ exports.login = (req, res, next) => {
             return res.json({user: passportUser, token});
         }); 
         return res.status(400).json({
-            message: "Đã có lỗi xảy ra. Đăng nhập thất bại."
+            message: message.message
         });
     })(req, res, next);
 }

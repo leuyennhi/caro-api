@@ -19,14 +19,14 @@ module.exports = function(passport) {
                     return done(err);
 
                 if (!user) {
-                    return done(null, false, {message: "Tài khoản không tồn tại"});
+                    return done(null, false, {message: "Tài khoản không tồn tại."});
                 }
 
                 if(!await bcrypt.compare(password, user.password)) {
-                    return done(null, false, {message: "Mật khẩu không đúng"});
+                    return done(null, false, {message: "Mật khẩu không đúng."});
                 }
 
-                return done(null, user, {message: "Đăng nhập thành công"});
+                return done(null, user, {message: "Đăng nhập thành công."});
             });
         }
     ));
