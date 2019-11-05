@@ -35,16 +35,18 @@ exports.login = (req, res, next) => {
         if (err) {
             return next(err);
         }
-        req.login(passportUser, {session: false}, (err) => {
-            if (err) {
-                return res.send(err);
-            }
-            //console.log(passportUser);
-            // generate a signed son web token with the contents of user object and return it in the response
-            const token = jwt.sign({id: passportUser.id}, jwtSecret.secret);
-            return res.json({user: passportUser, token});
-        }); 
-        return res.status(400).json({
+        if(passportUser) {
+            req.login(passportUser, {session: false}, (err) => {
+                if (err) {
+                    return res.send(err);
+                }
+                //console.log(passportUser);
+                // generate a signed son web token with the contents of user object and return it in the response
+                const token = jwt.sign({id: passportUser.id}, jwtSecret.secret);
+                return res.json({user: passportUser, token});
+            });
+        }
+        return res.status(500).json({
             message: message.message
         });
     })(req, res, next);
@@ -58,7 +60,7 @@ exports.me = (req, res, next) => {
         if (passportUser) {
             return res.json({user: passportUser});
         }
-        return res.status(400).json({
+        return res.status(500).json({
             message: "Đã có lỗi xảy ra."
         })
     })(req, res, next);
