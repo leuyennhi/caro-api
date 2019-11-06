@@ -55,7 +55,10 @@ app.use(function(err, req, res, next) {
 });
 
 app.get('*', (req, res) => {
-  res.json({ message: 'Caro-api app' });
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.json({ message: 'Caro-api app' });
 }); 
 
 module.exports = app;
