@@ -156,6 +156,7 @@ exports.loginFacebook = (req, res) => {
 }
 
 exports.loginGoogle = (req, res) => {
+    console.log("login...");
     passport.authenticate('google', { session: false }, (profile) => {
         if (!profile) {
             return res.redirect('https://hw3-caro-game-update.herokuapp.com/login');

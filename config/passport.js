@@ -58,7 +58,7 @@ module.exports = function(passport) {
         clientID: process.env.FACEBOOK_APP_ID,
         clientSecret: process.env.FACEBOOK_APP_SECRET,
         callbackURL: "/login/facebook/callback",
-        profileFields: ['id', 'displayname', 'email']
+        profileFields: ['id', 'displayName', 'email']
     }, function (accessToken, refreshToken, profile, done) {
         console.log(profile._json);
         return done(profile._json);
