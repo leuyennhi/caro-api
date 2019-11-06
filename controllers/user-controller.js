@@ -12,7 +12,7 @@ exports.register = (req, res) => {
         }
         
         if (user) {
-            return res.status(500).json({message: "Email đã tồn tại."});
+            return res.status(500).json({message: "Email đã tồn tại, vui lòng thay đổi email!"});
         }   
         
         var newUser = new User({
@@ -61,7 +61,7 @@ exports.me = (req, res, next) => {
             return res.json({user: passportUser});
         }
         return res.status(500).json({
-            message: "Đã có lỗi xảy ra."
+            message: "Đã có lỗi xảy ra, vui lòng thử lại!"
         });
     })(req, res, next);
 }
@@ -71,7 +71,7 @@ exports.update = (req,res,next) => {
       .exec( function(err, result) {
         if(err) {
             return res.status(500).json({
-                message: "Đã có lỗi xảy ra, không thể cập nhật thông tin." 
+                message: "Đã có lỗi xảy ra, không thể cập nhật thông tin!" 
             });
         }
         else {
@@ -79,12 +79,12 @@ exports.update = (req,res,next) => {
             {
                 if (err) {
                     return res.status(500).json({
-                        message: "Đã có lỗi xảy ra, không thể cập nhật thông tin." 
+                        message: "Đã có lỗi xảy ra, không thể cập nhật thông tin!" 
                     });
                 }
                 
                 if (user) {
-                    return res.json({user, message: "Cập nhật thông tin thành công"});
+                    return res.json({user, message: "Cập nhật thông tin thành công!"});
                 } 
             })
         }
@@ -95,7 +95,7 @@ exports.changepass = (req,res,next) => {
     User.findOne({'_id': req.body._id}, async function(err, result){
         if(err) {
             res.status(500).json({
-                message: "Đã có lỗi xảy ra, không thể cập nhật thông tin." 
+                message: "Đã có lỗi xảy ra, không thể thể đổi mật khẩu!" 
             })
         }
 
@@ -103,7 +103,7 @@ exports.changepass = (req,res,next) => {
 
         if(!test)
         {
-            return res.status(500).json({message: "Mật khẩu hiện tại không đúng."});
+            return res.status(500).json({message: "Mật khẩu hiện tại không đúng. Vui lòng thử lại!"});
         }
 
         else {
@@ -111,13 +111,80 @@ exports.changepass = (req,res,next) => {
           await User.findByIdAndUpdate(req.body._id, {$set: {password: password}}).exec(function(err,result){
             if(err) {
                 return res.status(500).json({
-                    message: "Đã có lỗi xảy ra, không thể cập nhật thông tin." 
+                    message: "Đã có lỗi xảy ra, không thể thay đổi mật khẩu!" 
                 });
             }
             return res.json({
-                message: "Đổi mật khẩu thành công." 
+                message: "Đổi mật khẩu thành công!" 
             });
           }); 
         }
       })
+}
+
+exports.loginFacebook = (req, res) => {
+    passport.authenticate('login-facebook', { session: false }, (profile) => {
+        if (!profile) {
+            return res.redirect('https://hw3-caro-game-update.herokuapp.com/login');
+        }
+        User.findOne({ facebookId: profile.id }, (err, user) => {
+
+            if (err) {
+                return res.status(500).json({
+                    message: "Đã có lỗi xảy ra, không thể đăng nhập!" 
+                });
+            }
+            if (user) {
+                const token = jwt.sign({id: user.id}, jwtSecret.secret);
+                return res.redirect(`https://hw3-caro-game-update.herokuapp.com/login?token=${{user, token}}`);
+            }
+            else {
+                const userFacebook = new User({
+                    displayname: profile.displayname,
+                    facebookId: profile.id,
+                    email: profile.email,
+                })
+                userFacebook.save(function(err) {
+                    if (err)
+                        throw err;
+                    const token = jwt.sign({id: userFacebook.id}, jwtSecret.secret);
+                    return res.redirect(`https://hw3-caro-game-update.herokuapp.com/login?token=${{user: userFacebook, token}}`);
+                });
+            }
+        })
+    })(req, res);
+}
+
+exports.loginGoogle = (req, res) => {
+    passport.authenticate('google', { session: false }, (profile) => {
+        if (!profile) {
+            return res.redirect('https://hw3-caro-game-update.herokuapp.com/login');
+        }
+        User.findOne({ googleId: profile.id }, (err, user) => {
+
+            if (err) {
+                return res.status(500).json({
+                    message: "Đã có lỗi xảy ra, không thể đăng nhập!" 
+                });
+            }
+            if (user) {
+                const token = jwt.sign({id: user.id}, jwtSecret.secret);
+                return res.redirect(`https://hw3-caro-game-update.herokuapp.com/login?token=${{user, token}}`);
+            }
+            else {
+                const userGoogle = new User({
+                    email: profile.email,
+                    displayname: profile.displayname,
+                    googleId: profile.id,
+                })
+
+                userGoogle.save(function(err) {
+                    if (err)
+                        throw err;
+                    const token = jwt.sign({id: userGoogle.id}, jwtSecret.secret);
+                    return res.redirect(`https://hw3-caro-game-update.herokuapp.com/login?token=${{user: userGoogle, token}}`);
+                });
+            }
+        })
+    })(req, res);
 }

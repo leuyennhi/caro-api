@@ -5,6 +5,9 @@ const ExtractJWT = passportJWT.ExtractJwt;
 const User = require('../models/user-model.js');
 const jwtSecret = require('./jwt.js');
 const bcrypt = require('bcrypt');
+const FacebookStrategy = require('passport-facebook').Strategy;
+const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+require('dotenv').config();
 
 module.exports = function(passport) {
 
@@ -50,4 +53,25 @@ module.exports = function(passport) {
             });
     }
     ));
+
+    passport.use('login-facebook', new FacebookStrategy({
+        clientID: process.env.FACEBOOK_APP_ID,
+        clientSecret: process.env.FACEBOOK_APP_SECRET,
+        callbackURL: "/login/facebook/callback",
+        profileFields: ['id', 'displayname', 'email']
+    }, function (accessToken, refreshToken, profile, done) {
+        console.log(profile._json);
+        return done(profile._json);
+    })
+    );
+    
+    passport.use('login-google', new GoogleStrategy({
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: "/login/google/callback",
+    }, function (token, tokenSecret, profile, done) {
+        console.log(profile);
+        return done(profile);
+    })
+    ); 
 }
