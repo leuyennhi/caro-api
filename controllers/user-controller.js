@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 
 exports.register = (req, res) => {
     
-    User.findOne({ 'email' : req.body.email }, async function(err, user) {
+    User.findOne({'email' : req.body.email }, async function(err, user) {
         if (err) {
             return res.status(500).json({message: err.message});
         }
@@ -62,6 +62,62 @@ exports.me = (req, res, next) => {
         }
         return res.status(500).json({
             message: "Đã có lỗi xảy ra."
-        })
+        });
     })(req, res, next);
+}
+
+exports.update = (req,res,next) => {
+    User.findByIdAndUpdate(req.body._id, {$set: {displayname: req.body.displayname}})
+      .exec( function(err, result) {
+        if(err) {
+            return res.status(500).json({
+                message: "Đã có lỗi xảy ra, không thể cập nhật thông tin." 
+            });
+        }
+        else {
+            User.findOne({'_id': req.body._id}, async function(err, user) 
+            {
+                if (err) {
+                    return res.status(500).json({
+                        message: "Đã có lỗi xảy ra, không thể cập nhật thông tin." 
+                    });
+                }
+                
+                if (user) {
+                    return res.json({user, message: "Cập nhật thông tin thành công"});
+                } 
+            })
+        }
+      });
+}
+
+exports.changepass = (req,res,next) => {
+    User.findOne({'_id': req.body._id}, async function(err, result){
+        if(err) {
+            res.status(500).json({
+                message: "Đã có lỗi xảy ra, không thể cập nhật thông tin." 
+            })
+        }
+
+        var test = await bcrypt.compare(req.body.passpresent, result.password);
+
+        if(!test)
+        {
+            return res.status(500).json({message: "Mật khẩu hiện tại không đúng."});
+        }
+
+        else {
+          var password = await bcrypt.hash(req.body.password, 10);
+          await User.findByIdAndUpdate(req.body._id, {$set: {password: password}}).exec(function(err,result){
+            if(err) {
+                return res.status(500).json({
+                    message: "Đã có lỗi xảy ra, không thể cập nhật thông tin." 
+                });
+            }
+            return res.json({
+                message: "Đổi mật khẩu thành công." 
+            });
+          }); 
+        }
+      })
 }
